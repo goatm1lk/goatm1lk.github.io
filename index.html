@@ -8,16 +8,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script scr="downloadFile.mjs"></script>
     <script src="pdfRender.mjs"></script>
-    <script type="module">
-        import { ZplViewer } from "https://cdn.jsdelivr.net/npm/zpl-viewer@latest/dist/zpl-viewer.mjs";
 
-        const viewer = new ZplViewer();
-        const zplCode = `^XA^FO50,50^A0N,50,50^FDHello, ZPL!^FS^XZ`;
-        viewer.render(zplCode, document.getElementById("zplCanvas"));
-    </script>
 
 </head>
-<!-- Idek why but I the tailwind css package-->
 <!-- <style>
     #mainDiv {
 
