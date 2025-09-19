@@ -14,10 +14,17 @@ export default {
       },
       fontFamily: {
         lexend: ["Lexend", "serif"],
-        twop: ["Press Start 2P", "serif"]
-        
+        twop: ["Press Start 2P", "serif"],
       },
-
+      keyframes: {
+        "slide-across": {
+          "0%": { transform: "translateX(-10%)" },
+          "100%": { transform: "translateX(50vw)" },
+        },
+      },
+      animation: {
+        "turtle-walk": "slide-across 100s linear infinite",
+      },
     },
   },
   plugins: [],

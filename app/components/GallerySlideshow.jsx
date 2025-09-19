@@ -1,11 +1,10 @@
+"use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 const GalleySlideshow = () => {
   const DotsNavigation = ({ total, currentIndex, onDotClick }) => {
     return (
-      <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}
-      >
+      <div className="mt-[20px] justify-content-center grid grid-flow-col justify-items-center  place-content-center place-items-center">
         {Array.from({ length: total }).map((_, index) => (
           <span
             key={index}
@@ -27,100 +26,89 @@ const GalleySlideshow = () => {
   const images = [
     {
       image: "/Images/GmailCleaner.png",
-      text: "Having Fun!",
+      text: "A custom-built browser extension designed to streamline inbox management by bulk-deleting subscription and promotional emails efficiently.",
       color: "text-gray-600",
     },
     {
-      image: "/Images/LabelShowcase.png",
-      text: "Revolutionary Anti-Shiba Token",
+      image: "/Images/FedExRateAndShip.png",
+      text: "A FedEx Rate and Ship integration leveraging FedEx APIs. Supports domestic and international shipping with advanced options including Saturday delivery, hold-at-location, return shipments, email label generation, and FedEx One Rate services.",
       color: "text-gray-600",
     },
     {
-      image: "/Images/QuillaShowcase.gif",
-      text: "Loneliness Reduction",
-      color: "text-black",
-    },
-    {
-      image: "/Images/SwapWidgetAdjusted.png",
-      text: "Identity (finding a similar crew):",
+      image: "/Images/QuillaShowcase.png",
+      text: "A freelance project: a responsive website developed for a startup cryptocurrency venture, focusing on brand presence and usability.",
       color: "text-gray-600",
     },
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [intervalDuration, resetIntervalDuration] = useState(5000);
-  const intervalIdRef = useRef(null); 
+  const intervalIdRef = useRef(null);
 
   const resetTimer = () => {
-    resetIntervalDuration(5000); 
+    resetIntervalDuration(5000);
   };
   const goToNextImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    resetTimer()
+    resetTimer();
   };
-  
+
   const goToPreviousImage = () => {
     setCurrentIndex(
       (prevIndex) => (prevIndex - 1 + images.length) % images.length
     );
-    resetTimer()
+    resetTimer();
   };
-  
+
   const handleDotClick = (index) => {
     setCurrentIndex(index);
-    resetTimer()
+    resetTimer();
   };
-  
 
-  
   useEffect(() => {
     // Function to start the interval with the current interval duration
     const startInterval = () => {
-        console.log("test123412321321")
       // Clear the existing interval if it exists
       if (intervalIdRef.current) {
-        
         clearInterval(intervalIdRef.current);
       }
-      
+
       // Start the interval to automatically change the image
       intervalIdRef.current = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
       }, intervalDuration);
     };
-  
+
     // Start a new interval when intervalDuration or images.length changes
     startInterval();
-  
+
     // Cleanup the interval on unmount or when the effect dependencies change
     return () => {
       if (intervalIdRef.current) {
         clearInterval(intervalIdRef.current);
       }
     };
-  }, [intervalDuration, images.length,currentIndex]); // Dependency on intervalDuration ensures the timer restarts whenever it changes
-  
-  
-  
+  }, [intervalDuration, images.length, currentIndex]); // Dependency on intervalDuration ensures the timer restarts whenever it changes
 
   const currentImage = images[currentIndex];
   return (
     <>
-      <div className="h-[1000px] w-100% grid grid-flow-col place-content-center m-5 p-5 ">
-        <div className="relative bottom-12 w-[1700px] h-[900px] place-content-center border-4 border-black shadow-lg shadow-gray-400 drop-shadow-2xl mt-[48px]">
-          <div
-            className="relative justify-items-center place-content-start text-center bottom-[450px] mb-7"
-          >
-            <h1 className="press-start-2p-regular text-3xl">
-              Project Showcase
-            </h1>
+      <div className="w-full p-5 grid grid-flow-row place-content-center place-items-center justify-items-center ">
+        <h1 className="press-start-2p-regular text-3xl m-5">
+          Project Showcase
+        </h1>
+
+        <div className="grid w-[52rem] h-full border-4 border-black bg-green-100 shadow-lg drop-shadow-2xl place-content-center justify-items-end place-items-end relative m-5 p-5">
+          <div className="relative min-w-[50rem] min-h-[500px]">
+            <Image
+              src={currentImage.image}
+              alt="Loading..."
+              fill
+              className="cover"
+            />
           </div>
-          <Image
-            src={currentImage.image}
-            alt={"Loading..."}
-            layout="fill"
-          ></Image>
+
           <button
-            className="button-right absolute right-12"
+            className="button-right absolute right-12 mb-5"
             onClick={goToNextImage}
           >
             <div className="line one">
@@ -170,7 +158,7 @@ const GalleySlideshow = () => {
             </div>
           </button>
           <button
-            className="button absolute left-[50px]"
+            className="button absolute left-[50px] mb-5"
             onClick={goToPreviousImage}
           >
             <div className="line one">
@@ -221,14 +209,17 @@ const GalleySlideshow = () => {
           </button>
           {/* <button className="absolute right-5" onClick={goToNextImage}>Next</button>
                 <button className="absolute left-5" onClick={goToPreviousImage}>Previous</button> */}
-          <section className="relative bottom-[-380px]">
-            <DotsNavigation
-              total={images.length}
-              currentIndex={currentIndex}
-              onDotClick={handleDotClick}
-            ></DotsNavigation>
-          </section>
         </div>
+        <div className="grid text-center max-w-[800px] min-h-[72px]">
+          <p className="max-h-[200px] max-w-[1000px]">{currentImage.text}</p>
+        </div>
+        <section className="">
+          <DotsNavigation
+            total={images.length}
+            currentIndex={currentIndex}
+            onDotClick={handleDotClick}
+          ></DotsNavigation>
+        </section>
       </div>
     </>
   );

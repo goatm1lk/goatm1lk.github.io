@@ -2,11 +2,11 @@
 import Image from "next/image";
 
 const ProjectDisplay = ({ projectName, projectImageURL, onClick }) => {
-  console.log(projectName, projectImageURL);
+
   return (
     <>
       <div
-        className="relative w-[900px] h-[900px] bg-opacity-50 bg-gray-500"
+        className="relative  bg-opacity-50 bg-gray-500"
         onClick={onClick}
       >
         {/* Image */}
@@ -19,7 +19,7 @@ const ProjectDisplay = ({ projectName, projectImageURL, onClick }) => {
             alt="Loading... Insert Loading GIF here."
             height={800}
             width={800}
-            className="absolute  w-[90%] h-[90%] object-fit "
+            className="absolute  w-[90%] h-[90%]"
           />
         </div>
 
