@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import ProjectDisplay from "./components/projectDisplay";
+import ContactForm from "./components/ContactForm";
 import { useRef, useEffect, useState } from "react";
 import GallerySlideshow from "./components/GallerySlideshow";
 export default function Home() {
@@ -24,7 +24,7 @@ export default function Home() {
         @import
         url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
       </style>
-      <div className="grid grid-flow-row min-w-[1920px] min-h-[1080px] justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend border-4">
+      <div className="grid grid-flow-row h-full justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend border-4 rounded-xl border-gray-500 m-5 p-5">
         <div
           id="header"
           className="grid grid-flow-col grid-cols-3 justify-items-center w-full m-5 p-5 bg-opacity-50 bg-gray-700 place-items-center place-content-center"
@@ -63,7 +63,7 @@ export default function Home() {
             >
               <div className="justify-items-left m-5 p-5 bg-opacity-50 bg-gray-700 max-w-[80%] rounded-xl">
                 <h1 className="text-4xl">Kyle Sharpless</h1>
-                <h2 className="max-w-[100%] text-xl m-5 p-5">
+                <h2 className="text-xl m-5 p-5 place-content-center">
                   Welcome, and thanks for visiting! This site was built with
                   Next.js as a space to introduce myself and highlight the web
                   applications I’ve developed. If you’d like to connect,
@@ -72,7 +72,7 @@ export default function Home() {
                 </h2>
               </div>
               <div className="justify-items-center m-5 p-5 bg-opacity-50 bg-gray-900 max-w-[80%] place-content-center place-items-center">
-                <div className="w-[85%] justify-items-center grid grid-flow-col p-5 bg-opacity-50 bg-gray-500 rounded-xl place-items-center">
+                <div className="gap-5 justify-items-center grid grid-flow-col p-5 bg-opacity-50 bg-gray-500 rounded-xl place-items-center">
                   <a
                     href="https://github.com/goatm1lk"
                     className="group inline-block text-white relative"
@@ -107,7 +107,7 @@ export default function Home() {
               height={500}
             ></Image>
           </div> */}
-          <div className="bg-gray-600 bg-opacity-50 w-full border-2 border-gray-400 grid place-content-center justify-items-stretch">
+          <div className="bg-gray-600 bg-opacity-50 border-2 border-gray-400 grid place-content-center justify-items-stretch">
             <GallerySlideshow />
           </div>
         </div>
@@ -161,11 +161,11 @@ export default function Home() {
           ref={aboutMe}
         >
           <div className="grid grid-flow-col bg-[url(/Images/binarycode.gif)] bg-opacity-50 ">
-            <div className="grid grid-flow-row max-w-[70%] bg-gray-700 bg-opacity-90">
-              <h1 className="grid text-3xl m-2 p-2 text-center place-content-center bg-gray-900 h-[50%] justify-items-center press-start-2p-regular">
+            <div className="grid grid-flow-row max-w-[70%] bg-gray-700 bg-opacity-90 border-4 border-gray-500 justify-items-center m-5 p-5 rounded-xl">
+              <h1 className="grid text-3xl m-2 p-2 text-center place-content-center bg-gray-900 h-[75%] justify-items-center press-start-2p-regular border-4 border-gray-500 rounded-xl">
                 <p>About Me</p>
               </h1>
-              <h2 className="text-center text-slate-300 text-2xl bg-gray-900 bg-opacity-50 h-[90%] m-5 p-5 place-content-center">
+              <h2 className="text-center text-slate-300 text-2xl bg-gray-900 bg-opacity-50  m-5 p-5 place-content-center border-4 border-gray-500 rounded-xl">
                 Hello! My name is Kyle Sharpless, and I’m a Computer Science
                 student with a strong passion for technology and
                 problem-solving. I currently work full-time at TELUS Digital,
@@ -197,73 +197,52 @@ export default function Home() {
             </div>
 
             <div className="bg-gray-700 bg-opacity-50 ">
-              <div className="grid grid-flow-row border-4 border-gray-500">
-                <div className="grid grid-flow-col">
-                  <Image
-                    src="/Images/CoffeeShop1.JPG"
-                    alt="Loading... Insert Loading GIF here."
-                    height={197}
-                    width={350}
-                    className="min-w-[350px] min-h-[465px]  border-4 border-gray-700"
-                  />
-                  <Image
-                    src="/Images/WeddingGuestPhoto.jpg"
-                    alt="Loading... Insert Loading GIF here."
-                    height={300}
-                    width={300}
-                    className="min-w-[350px] min-h-[467px]  border-4 border-gray-700"
-                  />
+              <div className="grid grid-flow-row border-4 border-gray-500 place-content-center justify-items-center m-5 p-5 bg-gray-800 bg-opacity-75 rounded-xl">
+                <div className="flex flex-col min-w-[25rem] gap-5 justify-items-center p-5">
+
+                  {/* SUCCESS: Relative container with responsive height */}
+                  <div className="relative w-full h-96 ">
+                    <Image
+                      src="/Images/CoffeeShop1.JPG"
+                      alt="Coffee Shop"
+                      fill
+                      priority // Crucial for 2025 LCP performance
+                      className="border-4 border-gray-700 object-cover"
+                    />
+                  </div>
+                  <div className="relative w-full h-96">
+                    <Image
+                      src="/Images/Desert.jpg"
+                      alt="Loading... Insert Loading GIF here."
+                      fill
+                      className="border-4 border-gray-700 object-cover"
+                    />
+                  </div>
+                  <div className="relative w-full h-96">
+                    <Image
+                      src="/Images/WeddingPhoto3FullCrop2.jpg"
+                      alt="Loading... Insert Loading GIF here. "
+                      fill
+                      className=" border-4 border-gray-700"
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-flow-col">
-                  <Image
-                    src="/Images/Desert.jpg"
-                    alt="Loading... Insert Loading GIF here."
-                    height={300}
-                    width={300}
-                    className="min-w-[350px] min-h-[467px]  border-4 border-gray-700"
-                  />
-                  <Image
-                    src="/Images/WeddingPhoto3FullCrop2.jpg"
-                    alt="Loading... Insert Loading GIF here. "
-                    height={300}
-                    width={300}
-                    className="min-w-[350px] max-h-[467px]  border-4 border-gray-700"
-                  />
-                </div>
+
               </div>
             </div>
           </div>
         </div>
         <div
-          className="w-full justify-items-center m-5 max-h-[400px] grid border-2 border-gray-500 bg-gray-700 bg-opacity-50"
+          className="grid grid-flow-row h-full w-full justify-items-center grid border-2 border-gray-500 bg-gray-700 bg-opacity-50 gap-4 p-5"
           ref={contact}
         >
-          <h1 className="text-4xl top-6 relative press-start-2p-regular">
+          <h1 className="text-4xl top-6 grid press-start-2p-regular">
             Contact me if you are Interested!
           </h1>
-          <div className="w-full grid justify-items-center  m-5 p-5">
-            <div
-              id="contact-footer"
-              className="grid grid-flow-col w-full justify-items-center m-5 p-5 bg-gray-600 bg-opacity-50 border-2 border-gray-600 "
-            >
-              <div
-                className="bg-[url('/Images/GitHub.jpg')] bg-cover cursor-pointer min-h-[200px] min-w-[200px] border-2 border-gray-500 hover:shadow-xl hover:shadow-black"
-                onClick={() => handleDivClick("https://github.com/goatm1lk")}
-              ></div>
-              <div
-                className="bg-[url('/Images/LinkedIn.png')] bg-cover cursor-pointer min-h-[200px] min-w-[200px] border-2 border-gray-500 hover:shadow-xl hover:shadow-black"
-                onClick={() =>
-                  handleDivClick("https://linkedin.com/in/kylesharpless")
-                }
-              ></div>
-              <div
-                className="bg-[url('/Images/gmail.png')] bg-cover cursor-pointer min-h-[200px] min-w-[200px] border-2 border-gray-500 hover:shadow-xl hover:shadow-black"
-                onClick={() =>
-                  handleDivClick("mailto:sharpless.kale@gmail.com")
-                }
-              ></div>
-            </div>
+          <div className="flex flex-row h-full">
+              <ContactForm/>
           </div>
+            
         </div>
       </div>
     </>

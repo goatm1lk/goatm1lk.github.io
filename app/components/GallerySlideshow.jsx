@@ -92,13 +92,13 @@ const GalleySlideshow = () => {
   const currentImage = images[currentIndex];
   return (
     <>
-      <div className="w-full p-5 grid grid-flow-row place-content-center place-items-center justify-items-center ">
+      <div className=" p-5 grid grid-flow-row place-content-center place-items-center justify-items-center ">
         <h1 className="press-start-2p-regular text-3xl m-5">
           Project Showcase
         </h1>
 
-        <div className="grid w-[52rem] h-full border-4 border-black bg-green-100 shadow-lg drop-shadow-2xl place-content-center justify-items-end place-items-end relative m-5 p-5">
-          <div className="relative min-w-[50rem] min-h-[500px]">
+        <div className="grid border-4 border-black bg-green-100 shadow-lg drop-shadow-2xl place-content-center justify-items-end place-items-end relative m-5 p-5">
+          <div className="relative min-w-[25rem] min-h-[25rem]">
             <Image
               src={currentImage.image}
               alt="Loading..."
@@ -106,7 +106,6 @@ const GalleySlideshow = () => {
               className="cover"
             />
           </div>
-
           <button
             className="button-right absolute right-12 mb-5"
             onClick={goToNextImage}
