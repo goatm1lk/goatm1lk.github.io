@@ -145,8 +145,7 @@ export default function Home() {
             ></ProjectDisplay>
           </div> */}
         </div>
-        {/* 🐢 Turtle Walk Animation */}
-        <div className="w-full h-[250px] overflow-hidden relative bg-[url(/Images/turtleback.png)]">
+        <div className="w-full h-[100%] overflow-hidden relative bg-[url(/Images/turtleback.png)]">
           <div className="animate-turtle-walk h-[140px]">
             <Image
               src="/Images/short-walking-turtle.gif"
