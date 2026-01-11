@@ -24,7 +24,7 @@ export default function Home() {
         @import
         url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
       </style>
-      <div className="grid grid-flow-row h-full justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend border-4 rounded-xl border-gray-500 m-5 p-5">
+      <div className="grid grid-flow-row h-full justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend border-4 rounded-xl border-gray-500 p-5 w-full">
         <div
           id="header"
           className="grid grid-flow-col grid-cols-3 justify-items-center w-full m-5 p-5 bg-opacity-50 bg-gray-700 place-items-center place-content-center"
