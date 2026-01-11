@@ -42,7 +42,6 @@ export default function ContactForm() {
     }
     const sendMessage = async () => {
         try {
-            console.log("API KEY: ", process.env.MAIL_CHIMP_API_KEY);
             const response = await fetch('../api/sendMessage', {
                 method: 'POST',
                 headers: {
