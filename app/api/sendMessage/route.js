@@ -6,7 +6,6 @@ export async function POST(request) {
     const { name, email, message } = await request.json();
 
     console.log("Received message from:", name, email, message);
-    console.log("Using Mailgun API Key:", process.env.PROD_MAILGUN ? "Present" : "Missing");
     const mailgun = new Mailgun(FormData);
 
     const mg = mailgun.client({
