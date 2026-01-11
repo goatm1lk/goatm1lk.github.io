@@ -64,7 +64,7 @@ export default function Home() {
               id="Introduction"
               className="justify-items-left m-5 p-5 bg-opacity-50 bg-gray-900"
             >
-              <div className="justify-items-left m-5 p-5 bg-opacity-50 bg-gray-700 max-w-[80%] rounded-xl">
+              <div className="justify-items-left m-5 p-5 bg-opacity-50 bg-gray-700 rounded-xl">
                 <h1 className="text-4xl">Kyle Sharpless</h1>
                 <h2 className="text-xl m-5 p-5 place-content-center">
                   Welcome, and thanks for visiting! This site was built with
@@ -74,7 +74,7 @@ export default function Home() {
                   the socials below.
                 </h2>
               </div>
-              <div className="justify-items-center m-5 p-5 bg-opacity-50 bg-gray-900 max-w-[80%] place-content-center place-items-center">
+              <div className="justify-items-center m-5 p-5 bg-opacity-50 bg-gray-900 place-content-center place-items-center">
                 <div className="gap-5 justify-items-center grid grid-flow-col p-5 bg-opacity-50 bg-gray-500 rounded-xl place-items-center">
                   <a
                     href="https://github.com/goatm1lk"
@@ -164,7 +164,7 @@ export default function Home() {
           ref={aboutMe}
         >
           <div className="grid grid-flow-col bg-[url(/Images/binarycode.gif)] bg-opacity-50 ">
-            <div className="grid grid-flow-row max-w-[70%] bg-gray-700 bg-opacity-90 border-4 border-gray-500 justify-items-center m-5 p-5 rounded-xl">
+            <div className="grid grid-flow-row bg-gray-700 bg-opacity-90 border-4 border-gray-500 justify-items-center m-5 p-5 rounded-xl">
               <h1 className="grid text-3xl m-2 p-2 text-center place-content-center bg-gray-900 h-[75%] justify-items-center press-start-2p-regular border-4 border-gray-500 rounded-xl">
                 <p>About Me</p>
               </h1>
@@ -185,7 +185,7 @@ export default function Home() {
                     Certifications
                   </h3>
                   <div className="grid grid-flow-row border-2 justify-items-center p-2">
-                    <div className="relative w-[300px] h-[280px]">
+                    <div className="relative w-full h-80 mb-2">
                       <Image
                         src="/Images/Network+-png.png"
                         alt="null"
