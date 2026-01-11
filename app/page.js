@@ -20,10 +20,13 @@ export default function Home() {
   };
   return (
     <>
+    
       <style>
         @import
         url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
       </style>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
       <div className="grid grid-flow-row h-full justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend rounded-xl  p-5 w-full">
         <div
           id="header"
