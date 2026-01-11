@@ -241,9 +241,9 @@ export default function Home() {
           <h1 className="text-4xl top-6 grid press-start-2p-regular">
             Contact me if you are Interested!
           </h1>
-          <div className="flex flex-row h-full">
+          {/* <div className="flex flex-row h-full">
               <ContactForm/>
-          </div>
+          </div> */}
             
         </div>
       </div>
