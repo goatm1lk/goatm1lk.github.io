@@ -179,20 +179,21 @@ export default function Home() {
                 security. My ongoing goal is to continually expand my technical
                 abilities and stay at the forefront of the evolving tech
                 landscape.
-                <div className="grid grid-flow-row max-w-[100%] bg-gray-700 bg-opacity-50">
+                <div className="grid grid-flow-row bg-gray-700 bg-opacity-50">
                   <h3 className="text-center text-slate-300 text-2xl bg-gray-900 bg-opacity-50 h-[85%]  place-content-center font-bold">
                     Certifications
                   </h3>
                   <div className="grid grid-flow-row border-2 justify-items-center p-2">
-                    <div className="relative w-full h-80 mb-2">
+                    <div className="relative h-full">
                       <Image
                         src="/Images/Network+-png.png"
                         alt="null"
-                        fill
-                        className="object-fill"
+                        width={320}
+                        height={240}
+
                       />
                     </div>
-                    <h1>Credential ID: COMP001022466880</h1>
+              
                   </div>
                 </div>
               </h2>
