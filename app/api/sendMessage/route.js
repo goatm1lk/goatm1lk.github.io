@@ -4,7 +4,6 @@ import FormData from "form-data";
 
 export async function POST(request) {
     const { name, email, message } = await request.json();
-
     console.log("Received message from:", name, email, message);
     const mailgun = new Mailgun(FormData);
 

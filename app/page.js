@@ -208,7 +208,7 @@ export default function Home() {
                       src="/Images/CoffeeShop1.JPG"
                       alt="Coffee Shop"
                       fill
-                      priority // Crucial for 2025 LCP performance
+                      priority
                       className="border-4 border-gray-700 object-cover"
                     />
                   </div>

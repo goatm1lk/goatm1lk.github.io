@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 export default function ContactForm() {
-
+// Need an actual backend if not hosting on vercel.
     const [contactForm, setContactForm] = useState({
         name: "",
         email: "",
