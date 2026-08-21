@@ -2,9 +2,11 @@
 const nextConfig = {
   output: "export", // <=== enables static exports
   distDir: 'dist',
-  images:{
+  images: {
     unoptimized: true,
-  }
+  },
+  allowedDevOrigins: ['127.0.0.1'],
+
 };
 
 export default nextConfig;

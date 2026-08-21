@@ -1,0 +1,39 @@
+Here's a quick-reference for the hover effect knobs — all four constants sit at the top of ParticleField.js:
+
+The four constants
+javascript
+const HOVER_RADIUS = 140       // px — how far the cursor's influence reaches
+const HOVER_STRENGTH = 26      // px — max displacement at the very center of the cursor
+const MOUSE_LERP = 0.15        // smooths cursor tracking so the effect isn't jittery
+
+(the 4th relevant one, 0.3 opacity boost, lives inline — see below)
+
+Constant	What it controls	Raise it →	Lower it →
+HOVER_RADIUS	Size of the "zone of influence" around the cursor	Bigger area of particles react at once	Only particles very close to the cursor react
+HOVER_STRENGTH	Max push distance, at dead-center of the cursor	More dramatic displacement, particles fly further	More subtle nudge
+MOUSE_LERP	How fast the tracked cursor position catches up to the real one	Tighter/snappier tracking, feels more "direct"	Laggier, floatier, more delayed feel
+The falloff curve
+javascript
+const falloff = 1 - dist / HOVER_RADIUS
+const force = falloff * falloff * HOVER_STRENGTH
+
+This is squared (falloff * falloff) rather than linear, so the push is soft at the edges of HOVER_RADIUS and ramps up sharply near the center — a natural-feeling "bubble" rather than a hard-edged circle. If you want the effect to feel more uniform across the whole radius (less concentrated at the exact center), remove one falloff *:
+
+javascript
+const force = falloff * HOVER_STRENGTH  // linear falloff instead of squared
+
+Or for an even sharper, more "magnetic" feel right at the cursor tip, cube it:
+
+javascript
+const force = falloff * falloff * falloff * HOVER_STRENGTH
+The opacity boost
+javascript
+opacity = clamp(opacity + falloff * 0.3, 0.15, 1)
+
+That 0.3 is how much extra brightness particles get near the cursor — it's what makes them "light up," not just move. Set it to 0 if you'd rather the effect be purely physical movement with no glow response, or raise it (e.g. 0.6) for a more pronounced lighting effect.
+
+Where it lives in the loop
+
+The whole hover block sits after the grid-pull logic and before the ctx.arc() draw call — meaning it always applies on top of whatever else is happening (baseline drift, grid clustering, scroll parallax). Since it only modifies the local x/y/opacity used for that frame's draw call — never p.baseX/p.baseY — there's no risk of it interfering with the underlying particle simulation; it's purely a visual overlay each frame.
+
+One thing to keep in mind if you tune HOVER_STRENGTH much higher: since it pushes particles radially away from the cursor (dx / dist, dy / dist), very high values combined with a small HOVER_RADIUS can occasionally cause particles to "pop" past the cursor and briefly overlap on the opposite side if your frame rate dips — if you ever see that glitch, the fix is capping force to something like HOVER_RADIUS * 0.6 as a ceiling.

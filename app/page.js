@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
-import ContactForm from "./components/ContactForm";
+import ContactForm from "./components_old/ContactForm";
 import { useRef, useEffect, useState } from "react";
-import GallerySlideshow from "./components/GallerySlideshow";
+import GallerySlideshow from "./components_old/GallerySlideshow";
 export default function Home() {
-  function handleDivClick(url) {
-    window.open(url);
-  }
+  // function handleDivClick(url) {
+  //   window.open(url);
+  // }
   const intro = useRef(null);
   const projects1 = useRef(null);
   const projects2 = useRef(null);
@@ -28,33 +28,7 @@ export default function Home() {
       <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
       <div className="grid grid-flow-row h-full justify-items-center gap-[100px] bg-opacity-50 bg-gray-900 font-lexend rounded-xl  p-5 w-full">
-        <div
-          id="header"
-          className="grid grid-flow-col grid-cols-3 justify-items-center w-full m-5 p-5 bg-opacity-50 bg-gray-700 place-items-center place-content-center"
-        >
-          <p
-            className="press-start-2p-regular cursor-pointer group inline-block text-white relative"
-            onClick={() => scrollToSection(intro)}
-          >
-            Introduction
-            <span className="absolute left-0 right-0 -bottom-1 h-[2px] bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-          </p>
-
-          <p
-            className="press-start-2p-regular cursor-pointer group inline-block text-white relative"
-            onClick={() => scrollToSection(aboutMe)}
-          >
-            About Me!
-            <span className="absolute left-0 right-0 -bottom-1 h-[2px] bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-          </p>
-          <p
-            className="press-start-2p-regular cursor-pointer group inline-block text-white relative"
-            onClick={() => scrollToSection(contact)}
-          >
-            Contacts
-            <span className="absolute left-0 right-0 -bottom-1 h-[2px] bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-          </p>
-        </div>
+       
         <div
           className="grid grid-flow-col w-full justify-items-center bg-opacity-50 bg-gray-900  border-gray-700 border-2 p-10"
           ref={intro}
@@ -111,7 +85,7 @@ export default function Home() {
             ></Image>
           </div> */}
           <div className="bg-gray-600 bg-opacity-50 border-2 border-gray-400 grid place-content-center justify-items-stretch">
-            <GallerySlideshow />
+            {/* <GallerySlideshow /> */}
           </div>
         </div>
 
@@ -204,11 +178,11 @@ export default function Home() {
                 <div className="flex flex-col min-w-[25rem] gap-5 justify-items-center p-5">
 
                   {/* SUCCESS: Relative container with responsive height */}
-                  <div className="relative w-full h-96 ">
+                  {/* <div className="relative w-full h-96 ">
                     <Image
-                      src="/Images/CoffeeShop1.JPG"
+                      src="../public/Images/CoffeeShop1.JPG"
                       alt="Coffee Shop"
-                      fill
+                      fixed
                       priority
                       className="border-4 border-gray-700 object-cover"
                     />
@@ -228,7 +202,7 @@ export default function Home() {
                       fill
                       className=" border-4 border-gray-700"
                     />
-                  </div>
+                  </div> */}
                 </div>
 
               </div>
@@ -249,5 +223,6 @@ export default function Home() {
         </div>
       </div>
     </>
+    
   );
 }

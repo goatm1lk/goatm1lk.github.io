@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  color: var(--foreground);
+  background-image: url("../public/Images/homeBackground3.jpg");
+  background-size: cover;
+  font-family: Arial, Helvetica, sans-serif;
+  color:white;
+}
+
+
+.lexend-normal {
+  font-family: "Lexend", "serif";
+  font-optical-sizing: auto;
+  font-weight: 5;
+  font-style: normal;
+}
+.press-start-2p-regular {
+  font-family: "Press Start 2P", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.round {
+  width: 6px;
+  height: 6px;
+  background: black;
+  border-radius: 50%;
+  box-shadow: 2px 2px 2px green;
+}
+
+.line {
+  display: flex;
+  gap: 4px;
+}
+
+.two {
+  transform: translateX(10px);
+}
+
+.three {
+  transform: translateX(20px);
+}
+
+.four {
+  transform: translateX(30px);
+}
+
+.five {
+  transform: translateX(20px);
+}
+
+.six {
+  transform: translateX(10px);
+}
+.twoleft {
+  transform: translateX(-10px);
+}
+
+.threeleft {
+  transform: translateX(-20px);
+}
+
+.fourleft {
+  transform: translateX(-30px);
+}
+
+.fiveleft {
+  transform: translateX(-20px);
+}
+
+.sixleft {
+  transform: translateX(-10px);
+}
