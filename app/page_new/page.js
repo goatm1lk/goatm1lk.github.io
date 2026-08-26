@@ -16,7 +16,7 @@ const sectionStyle = {
 }
 
 const sectionStyleDebug = {
-  minHeight: '100vh',
+  minHeight: '1000vh',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -29,27 +29,30 @@ const sectionStyleDebug = {
 export default function Home() {
   return (
 
-    <div style={{ minHeight: '400vh', background: 'linear-gradient(135deg, #02030a 0%, #0f172a 100%)' }}>
+    <div style={{ minHeight: '800vh', background: 'linear-gradient(135deg, #02030a 0%, #0f172a 100%)' }}>
 
       <ParticleField />
-      <section data-particle-focus="rocket" style={sectionStyleDebug}>
-        
-      </section>
-      <header style={{ position: 'relative', zIndex: 1 }}>
-        <div id="header">
-          <p>Introduction</p>
-          <p className="press-start-2p-regular cursor-pointer group inline-block text-white relative">
-            About Me!
-            <span ></span>
-          </p>
-          <p>
-            Contacts
-            <span></span>
-          </p>
-        </div>
-      </header>
-      <main style={{ position: 'relative', zIndex: 1 }}>
 
+
+
+      <main style={{ position: 'relative', zIndex: 1 }}>
+        <section data-particle-focus="rocket" style={sectionStyleDebug}>
+          <div style={{ position: 'sticky', top: '40vh', textAlign: 'center' }}>
+            <header style={{ position: 'relative', zIndex: 1 }}>
+              <div id="header">
+                <p>Introduction</p>
+                <p className="press-start-2p-regular cursor-pointer group inline-block text-white relative">
+                  About Me!
+                  <span ></span>
+                </p>
+                <p>
+                  Contacts
+                  <span></span>
+                </p>
+              </div>
+            </header>
+          </div>
+        </section>
         <section data-particle-focus="left" style={{ ...sectionStyle, justifyContent: 'flex-start' }}>
           <div style={{ maxWidth: '560px', background: 'rgba(15, 23, 42, 0.76)', padding: '2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.12)' }}>
             <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Left side focus</h2>

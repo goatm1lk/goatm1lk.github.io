@@ -3,45 +3,43 @@
 import { useEffect, useRef } from 'react'
 import styles from './ParticleField.module.css'
 
-const PARTICLE_COUNT = 600
+const PARTICLE_COUNT = 700
 const BASE_SPEED = 0.1
 const MAX_SPEED = 1.2
 const PARTICLE_SIZE = 1.4
-const SCROLL_DECAY = 0.9
+const SCROLL_DECAY = 0.9              // restored — 0.1 made scroll-driven drift twitchy/clanky
 const VISIBILITY_DECAY = 0.85
 const BASELINE_FRACTION = 0.3
 const MAX_PULL = 0.9
 const HOVER_RADIUS = 140
 const HOVER_STRENGTH = 26
 const MOUSE_LERP = 0.15
-const SHAPE_POINT_COUNT = 340
-const SHAPE_OUTLINE_RATIO = 0.65
-const SHAPE_JITTER = 5
+const SHAPE_POINT_COUNT = 400
+const SHAPE_OUTLINE_RATIO = 0.9
+const SHAPE_JITTER = 0
 const SHAPE_FILL_RATIO = 0.85
-const SHAPE_PULL_MULTIPLIER = 2.2
+const SHAPE_PULL_MULTIPLIER = 6
 const SHAPE_MAX_PULL = 0.97
 const SHAPE_PARTICLE_SIZE = 1.8
 
 // ── Liftoff / disperse tuning ────────────────────────────────
-const LAUNCH_RANGE_VH = 0.55     // fraction of viewport height the liftoff plays out over
-const LAUNCH_RISE = 320          // px the shape's target position rises during full liftoff
-const LAUNCH_PULL_LOOSEN = 0.75  // how much max pull drops at full launch (0-1, higher = more scatter)
-const LAUNCH_SCATTER = 70        // px of extra random per-particle kick at full launch
-const LAUNCH_SCATTER_DROP = 40   // px downward bias added to scatter, for a trailing-exhaust feel
+const LAUNCH_RANGE_VH = 4.0      // rocket section is 600vh tall — spread the liftoff across most of it
+const LAUNCH_RISE = 1000         // px the shape's target position rises during full liftoff
+const LAUNCH_SCATTER = 400       // (currently unused — reuse if you want particle-level scatter again)
+const LAUNCH_SCATTER_DROP = 40   // (currently unused)
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
 }
 
-// ── Shape system ──────────────────────────────────────────────
-// Shapes are defined as polygons in normalized 0-1 space. Points are
-// generated two ways and combined: outline points (walked evenly along
-// the perimeter, so thin parts like a nose tip get coverage) plus
-// interior fill points (random rejection sampling, for volume). Each
-// point is also tagged with a color via a per-shape colorFn, based on
-// its position — e.g. a rocket's nose, hull, windows, fins, and engine
-// each get a distinct tint.
+// The purpose of this function is to return a color based on a position of the rocketship.
+// The color is determined by the coordinates, of the rocketship on the page.
+function colorFn(x, y) {
+  if (y < 0.87 && (x > 0.2 && x < 0.8)) return "255, 176, 84"
+  return "255, 255, 255"
+}
 
+// ── Shape system ──────────────────────────────────────────────
 function isPointInPolygon(x, y, vertices) {
   let inside = false
   for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i++) {
@@ -106,12 +104,8 @@ function generateOutlinePoints(vertices, count) {
   return points
 }
 
-function defaultColorFn() {
-  return '255, 255, 255'
-}
-
-function generateShapePoints(vertices, totalCount, colorFn = defaultColorFn, outlineRatio = SHAPE_OUTLINE_RATIO) {
-  const outlineCount = Math.round(totalCount * outlineRatio)
+function generateShapePoints(vertices, totalCount) {
+  const outlineCount = Math.round(totalCount * SHAPE_OUTLINE_RATIO)
   const fillCount = totalCount - outlineCount
   const outlinePoints = generateOutlinePoints(vertices, outlineCount)
   const fillPoints = generateFilledShapePoints(vertices, fillCount)
@@ -144,18 +138,8 @@ const ROCKET_VERTICES = [
   { x: 0.42, y: 0.10 },
 ]
 
-function rocketColorFn(x, y) {
-  const dxCenter = Math.abs(x - 0.5)
-
-  if (y > 0.87) return '255, 176, 84'
-  if (y > 0.60 && dxCenter > 0.22) return '255, 122, 98'
-  if (y > 0.28 && y < 0.46 && dxCenter < 0.08) return '140, 224, 255'
-  if (y < 0.14) return '255, 244, 224'
-  return '206, 214, 255'
-}
-
 const SHAPES = {
-  rocket: generateShapePoints(ROCKET_VERTICES, SHAPE_POINT_COUNT, rocketColorFn),
+  rocket: generateShapePoints(ROCKET_VERTICES, SHAPE_POINT_COUNT),
 }
 
 function getActiveSection(sections, viewportHeight) {
@@ -195,6 +179,7 @@ export default function ParticleField() {
     let rawVel = 0
     let pageHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
     let sections = Array.from(document.querySelectorAll('[data-particle-focus]'))
+    let rocketSection = document.querySelector('[data-particle-focus="rocket"]')
     let smoothedVisibility = 0
     let smoothedBandLeft = 0
     let smoothedBandWidth = 0
@@ -213,6 +198,7 @@ export default function ParticleField() {
       H = canvas.height = window.innerHeight
       pageHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
       sections = Array.from(document.querySelectorAll('[data-particle-focus]'))
+      rocketSection = document.querySelector('[data-particle-focus="rocket"]')
     }
     resize()
     window.addEventListener('resize', resize)
@@ -252,6 +238,21 @@ export default function ParticleField() {
       }
     })
 
+    let exhaustParticles = []
+    const EXHAUST_SPAWN_RATE = 1
+    const EXHAUST_LIFE = 10
+    const EXHAUST_SPEED = 10
+    const EXHAUST_SPREAD = 2.9
+
+    let explosionParticles = []
+    let launchCompleteAtY = null
+    const EXPLOSION_RANGE_VH = 2.0
+    const EXPLOSION_SPAWN_RATE = 3
+    const EXPLOSION_LIFE = 100
+    const EXPLOSION_SPEED_MIN = 1.5
+    const EXPLOSION_SPEED_MAX = 5
+    const EXPLOSION_GRAVITY = 0.04
+
     const gridCols = Math.ceil(Math.sqrt(PARTICLE_COUNT))
 
     let frame = 0
@@ -267,44 +268,64 @@ export default function ParticleField() {
       const progress = clamp(scrollY / pageHeight, 0, 1)
       const speed = BASE_SPEED + Math.min(Math.abs(scrollVel) * 0.6, MAX_SPEED - BASE_SPEED)
 
+      // ── Resolve which section/focus is active FIRST ──────────────
+      // (this must happen before activeShapePoints/isShapeMode are
+      // computed — that ordering bug was the root cause of the rocket
+      // never actually launching/exploding correctly)
       const activeSection = getActiveSection(sections, H)
+      const rocketRect = rocketSection ? rocketSection.getBoundingClientRect() : null
+      const rocketOnScreen = rocketRect && rocketRect.bottom > 0 && rocketRect.top < H
+
       let rect = null
       let rawVisibility = 0
       let activeFocusValue = 'center'
 
-      if (activeSection) {
+      if (rocketOnScreen) {
+        rect = rocketRect
+        activeFocusValue = 'rocket'
+        const visibleHeight = Math.min(rocketRect.bottom, H) - Math.max(rocketRect.top, 0)
+        rawVisibility = clamp(visibleHeight / Math.min(rocketRect.height, H), 0, 1)
+      } else if (activeSection) {
         rect = activeSection.getBoundingClientRect()
         const visibleHeight = Math.min(rect.bottom, H) - Math.max(rect.top, 0)
         rawVisibility = clamp(visibleHeight / Math.min(rect.height, H), 0, 1)
         activeFocusValue = activeSection.dataset.particleFocus || 'center'
       }
 
+      // Now safe to resolve — activeFocusValue is final for this frame.
       const activeShapePoints = SHAPES[activeFocusValue] || null
       const isShapeMode = Boolean(activeShapePoints)
       let fillTargetsReady = false
 
-      // Liftoff progress: 0 while the section is approaching/centered,
-      // ramps to 1 as you keep scrolling and its center rises above the
-      // viewport's center. Recalculated fresh every frame from scroll
-      // position alone, so scrolling back up smoothly re-assembles the
-      // shape — no separate animation state to track.
+      // Liftoff progress: 0 near the top of the rocket section, ramps
+      // to 1 as the user scrolls LAUNCH_RANGE_VH viewport-heights down
+      // into it. Recalculated fresh every frame from scroll position
+      // alone — scrolling back up smoothly re-assembles the shape.
       let launchProgress = 0
-      if (rect && isShapeMode) {
-        const sectionCenterY = rect.top + rect.height / 2
-        const viewportCenterY = H / 2
-        const risenAboveCenter = viewportCenterY - sectionCenterY
+      if (rocketRect) {
+        const scrolledPastTop = -rocketRect.top
         const launchRange = H * LAUNCH_RANGE_VH
-        launchProgress = clamp(risenAboveCenter / launchRange, 0, 1)
+        launchProgress = clamp(scrolledPastTop / launchRange, 0, 1)
       }
+
+      if (isShapeMode && launchProgress >= 1 && launchCompleteAtY === null) {
+        launchCompleteAtY = scrollY
+      } else if (launchCompleteAtY !== null && scrollY < launchCompleteAtY - H * 0.5) {
+        launchCompleteAtY = null
+      }
+
+      const explosionRange = H * EXPLOSION_RANGE_VH
+      const explosionActive =
+        launchCompleteAtY !== null && (scrollY - launchCompleteAtY) < explosionRange
 
       if (rect) {
         let boxLeft, boxWidth, boxTop, boxHeight
 
         if (isShapeMode) {
-          boxHeight = Math.min(rect.height, rect.width) * SHAPE_FILL_RATIO
+          boxHeight = Math.min(H, rect.width) * SHAPE_FILL_RATIO
           boxWidth = boxHeight * 0.7
           boxLeft = rect.left + (rect.width - boxWidth) / 2
-          boxTop = rect.top + (rect.height - boxHeight) / 2
+          boxTop = (H - boxHeight) / 2
         } else {
           boxWidth = rect.width * 0.55
           boxLeft = rect.left + (rect.width - boxWidth) / 2
@@ -344,7 +365,7 @@ export default function ParticleField() {
       particles.forEach((p, i) => {
         const pulse = 0.45 + Math.sin(frame * p.drift * 40 + p.phase) * 0.18
         let opacity = clamp(pulse + progress * 0.28, 0.15, 1)
-        let colorRGB = '255, 255, 255' // default star color
+        let colorRGB = '255, 255, 255'
 
         p.angle += Math.sin(frame * p.drift + p.phase) * 0.01
         const vx = Math.cos(p.angle)
@@ -360,8 +381,8 @@ export default function ParticleField() {
         const jitterX = Math.sin(frame * 0.0015 + p.phase) * 10 * p.drift
         const jitterY = Math.cos(frame * 0.0012 + p.phase) * 8 * p.drift
 
-        let x = p.baseX + jitterX
-        let y = p.baseY + jitterY
+        let rocketX = p.baseX + jitterX
+        let rocketY = p.baseY + jitterY
 
         if (fillTargetsReady && smoothedVisibility > 0.001 && !p.isBaseline) {
           let fillX, fillY
@@ -373,19 +394,10 @@ export default function ParticleField() {
             fillY = smoothedRectTop + shapePoint.y * smoothedRectHeight +
               Math.cos(p.phase) * SHAPE_JITTER
 
-            // Liftoff: the target position rises as launchProgress climbs,
-            // so the whole shape appears to fly upward off-screen.
             fillY -= launchProgress * LAUNCH_RISE
 
-            // As launchProgress increases, max pull loosens — particles
-            // can no longer fully keep up with the rising target, so they
-            // lag behind it. That lag alone reads as a dispersing trail.
-            const loosenedMaxPull = SHAPE_MAX_PULL * (1 - launchProgress * LAUNCH_PULL_LOOSEN)
-            const pull = clamp(smoothedVisibility * SHAPE_PULL_MULTIPLIER, 0, loosenedMaxPull)
-
-            // Color blend also fades back toward white as particles
-            // disperse from formation, so they read as "just stars" again.
-            const colorBlend = clamp((pull / SHAPE_MAX_PULL) * (1 - launchProgress * 0.6), 0, 1)
+            const pull = clamp(smoothedVisibility * SHAPE_PULL_MULTIPLIER, 0, SHAPE_MAX_PULL)
+            const colorBlend = clamp(pull / SHAPE_MAX_PULL, 0, 1)
 
             const [zr, zg, zb] = shapePoint.color.split(',').map(Number)
             const r = Math.round(255 + (zr - 255) * colorBlend)
@@ -393,21 +405,8 @@ export default function ParticleField() {
             const b = Math.round(255 + (zb - 255) * colorBlend)
             colorRGB = `${r}, ${g}, ${b}`
 
-            x = p.baseX + (fillX - p.baseX) * pull + jitterX
-            y = p.baseY + (fillY - p.baseY) * pull + jitterY
-
-            // Extra per-particle scatter kick during liftoff, using the
-            // particle's own phase for varied, organic-looking spread
-            // rather than every particle scattering in lockstep. A slight
-            // downward bias gives a trailing-exhaust feel as the shape
-            // climbs away from the scattering particles.
-            if (launchProgress > 0) {
-              const scatterX = Math.cos(p.phase * 3.1) * LAUNCH_SCATTER * launchProgress
-              const scatterY = Math.sin(p.phase * 2.7) * LAUNCH_SCATTER * 0.6 * launchProgress +
-                launchProgress * LAUNCH_SCATTER_DROP
-              x += scatterX
-              y += scatterY
-            }
+            rocketX = p.baseX + (fillX - p.baseX) * pull + jitterX
+            rocketY = p.baseY + (fillY - p.baseY) * pull + jitterY
           } else {
             const col = i % gridCols
             const row = Math.floor(i / gridCols)
@@ -415,21 +414,21 @@ export default function ParticleField() {
             fillY = smoothedRectTop + (row / gridCols) * smoothedRectHeight + Math.cos(p.phase) * 20
 
             const pull = clamp(p.alignStrength * smoothedVisibility * 1.15, 0, MAX_PULL)
-            x = p.baseX + (fillX - p.baseX) * pull + jitterX
-            y = p.baseY + (fillY - p.baseY) * pull + jitterY
+            rocketX = p.baseX + (fillX - p.baseX) * pull + jitterX
+            rocketY = p.baseY + (fillY - p.baseY) * pull + jitterY
           }
         }
 
         if (mouseActive) {
-          const dx = x - mouseX
-          const dy = y - mouseY
+          const dx = rocketX - mouseX
+          const dy = rocketY - mouseY
           const dist = Math.sqrt(dx * dx + dy * dy)
 
           if (dist < HOVER_RADIUS && dist > 0.01) {
             const falloff = 1 - dist / HOVER_RADIUS
             const force = falloff * falloff * HOVER_STRENGTH
-            x += (dx / dist) * force
-            y += (dy / dist) * force
+            rocketX += (dx / dist) * force
+            rocketY += (dy / dist) * force
             opacity = clamp(opacity + falloff * 0.3, 0.15, 1)
           }
         }
@@ -439,9 +438,69 @@ export default function ParticleField() {
           : PARTICLE_SIZE
 
         ctx.beginPath()
-        ctx.arc(x, y, renderSize, 0, Math.PI * 2)
+        ctx.arc(rocketX, rocketY, renderSize, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(${colorRGB}, ${opacity})`
         ctx.fill()
+      })
+
+      // ── Exhaust trail — runs ONCE per frame, not per particle ──
+      if (isShapeMode && launchProgress > 0 && fillTargetsReady) {
+        const engineX = smoothedBandLeft + 0.50 * smoothedBandWidth
+        const engineY = smoothedRectTop + 0.90 * smoothedRectHeight - launchProgress * LAUNCH_RISE
+
+        for (let s = 0; s < EXHAUST_SPAWN_RATE; s++) {
+          exhaustParticles.push({
+            x: engineX + (Math.random() - 0.5) * 14,
+            y: engineY,
+            vx: (Math.random() - 0.5) * EXHAUST_SPREAD,
+            vy: EXHAUST_SPEED + Math.random() * EXHAUST_SPEED,
+            life: EXHAUST_LIFE,
+            maxLife: EXHAUST_LIFE,
+          })
+        }
+      }
+
+      exhaustParticles = exhaustParticles.filter(ep => {
+        ep.x += ep.vx
+        ep.y += ep.vy
+        ep.life--
+        if (ep.life <= 0) return false
+        const t = ep.life / ep.maxLife
+        ctx.beginPath()
+        ctx.arc(ep.x, ep.y, PARTICLE_SIZE * (0.6 + t * 0.8), 0, Math.PI * 2)
+        ctx.fillStyle = 'rgb(255, 165, 0)'
+        ctx.fill()
+        return true
+      })
+
+      // ── Explosion sprinkle at top of screen once fully launched ──
+      if (explosionActive) {
+        for (let s = 0; s < EXPLOSION_SPAWN_RATE; s++) {
+          const angle = Math.random() * Math.PI - Math.PI / 2
+          const speed = EXPLOSION_SPEED_MIN + Math.random() * (EXPLOSION_SPEED_MAX - EXPLOSION_SPEED_MIN)
+          explosionParticles.push({
+            x: W * 0.5 + (Math.random() - 0.5) * W * 0.4,
+            y: -10,
+            vx: Math.cos(angle) * speed,
+            vy: Math.abs(Math.sin(angle)) * speed * 0.5,
+            life: EXPLOSION_LIFE,
+            maxLife: EXPLOSION_LIFE,
+          })
+        }
+      }
+
+      explosionParticles = explosionParticles.filter(sp => {
+        sp.vy += EXPLOSION_GRAVITY
+        sp.x += sp.vx
+        sp.y += sp.vy
+        sp.life--
+        if (sp.life <= 0 || sp.y > H + 20) return false
+        const t = sp.life / sp.maxLife
+        ctx.beginPath()
+        ctx.arc(sp.x, sp.y, PARTICLE_SIZE * (0.5 + t * 0.9), 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(255, ${170 + Math.round(t * 60)}, ${60 + Math.round(t * 100)}, ${t})`
+        ctx.fill()
+        return true
       })
 
       rafId = requestAnimationFrame(draw)
