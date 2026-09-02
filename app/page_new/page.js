@@ -1,11 +1,19 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import styles from './style.module.css'
+import { Press_Start_2P } from 'next/font/google'
 const Planet = dynamic(() => import('../components/Planet'), { ssr: false })
 const ParticleField = dynamic(() => import('../components/ParticleField'), { ssr: false })
 
+const pressStart = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-press-start',
+})
+
 const sectionStyle = {
-  minHeight: '100vh',
+  minHeight: '250vh',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -36,22 +44,34 @@ export default function Home() {
 
 
       <main style={{ position: 'relative', zIndex: 1 }}>
-        <section data-particle-focus="rocket" style={sectionStyleDebug}>
-          <div style={{ position: 'sticky', top: '40vh', textAlign: 'center' }}>
-            <header style={{ position: 'relative', zIndex: 1 }}>
-              <div id="header">
-                <p>Introduction</p>
-                <p className="press-start-2p-regular cursor-pointer group inline-block text-white relative">
-                  About Me!
-                  <span ></span>
-                </p>
-                <p>
-                  Contacts
-                  <span></span>
-                </p>
+        <section data-particle-focus="rocket" style={sectionStyle}>
+          <div style={{ position: 'sticky', top: '40vh' }}>
+
+
+            <header className={`w-screen text-center text-white bg-gray-900 bg-opacity-10 backdrop-blur-md p-4 rounded-lg shadow-lg`}>
+              <div id="header" className="grid grid-cols-3 items-center text-center">
+                <span className={styles.wrapper}>
+                  <span className={styles.glow} />
+                  <span className={styles.text}>Introduction</span>
+                </span>
+
+
+                <span className={styles.wrapper}>
+                  <span className={styles.glow} />
+                  <span className={styles.text}>About Me!</span>
+                </span>
+
+
+                <span className={styles.wrapper}>
+                  <span className={styles.glow} />
+                  <span className={styles.text}>Contacts</span>
+                </span>
+
               </div>
             </header>
           </div>
+
+
         </section>
         <section data-particle-focus="left" style={{ ...sectionStyle, justifyContent: 'flex-start' }}>
           <div style={{ maxWidth: '560px', background: 'rgba(15, 23, 42, 0.76)', padding: '2rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.12)' }}>

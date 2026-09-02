@@ -23,7 +23,7 @@ const SHAPE_MAX_PULL = 0.97
 const SHAPE_PARTICLE_SIZE = 1.8
 
 // ── Liftoff / disperse tuning ────────────────────────────────
-const LAUNCH_RANGE_VH = 4.0      // rocket section is 600vh tall — spread the liftoff across most of it
+const LAUNCH_RANGE_VH = 1.0      // rocket section is 600vh tall — spread the liftoff across most of it
 const LAUNCH_RISE = 1000         // px the shape's target position rises during full liftoff
 const LAUNCH_SCATTER = 400       // (currently unused — reuse if you want particle-level scatter again)
 const LAUNCH_SCATTER_DROP = 40   // (currently unused)
@@ -239,14 +239,14 @@ export default function ParticleField() {
     })
 
     let exhaustParticles = []
-    const EXHAUST_SPAWN_RATE = 1
+    const EXHAUST_SPAWN_RATE = 50
     const EXHAUST_LIFE = 10
     const EXHAUST_SPEED = 10
-    const EXHAUST_SPREAD = 2.9
+    const EXHAUST_SPREAD = 25
 
     let explosionParticles = []
     let launchCompleteAtY = null
-    const EXPLOSION_RANGE_VH = 2.0
+    const EXPLOSION_RANGE_VH = 1.25
     const EXPLOSION_SPAWN_RATE = 3
     const EXPLOSION_LIFE = 100
     const EXPLOSION_SPEED_MIN = 1.5
