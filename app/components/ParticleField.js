@@ -14,7 +14,7 @@ const MAX_PULL = 0.9
 const HOVER_RADIUS = 140
 const HOVER_STRENGTH = 26
 const MOUSE_LERP = 0.15
-const SHAPE_POINT_COUNT = 400
+const SHAPE_POINT_COUNT = 480
 const SHAPE_OUTLINE_RATIO = 0.9
 const SHAPE_JITTER = 0
 const SHAPE_FILL_RATIO = 0.85
@@ -28,15 +28,27 @@ const LAUNCH_RISE = 1000         // px the shape's target position rises during 
 const LAUNCH_SCATTER = 400       // (currently unused — reuse if you want particle-level scatter again)
 const LAUNCH_SCATTER_DROP = 40   // (currently unused)
 
+// ── Camera shake (ignition rumble) ───────────────────────────
+const CAMERA_SHAKE_MAX = 5              // px, peak shake at ignition
+const CAMERA_SHAKE_VERTICAL_FACTOR = 0.5 // vertical shake is subtler than horizontal
+
+// ── Ignition smoke burst (one-shot, at the moment liftoff begins) ──
+const IGNITION_SMOKE_COUNT = 55
+const IGNITION_SMOKE_LIFE = 150
+
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
 }
 
-// The purpose of this function is to return a color based on a position of the rocketship.
-// The color is determined by the coordinates, of the rocketship on the page.
+// The purpose of this function is to return a color based on a position on the rocketship.
+// The color is determined by the coordinates of the point within the rocket's local (0-1) space.
 function colorFn(x, y) {
-  if (y < 0.87 && (x > 0.2 && x < 0.8)) return "255, 176, 84"
-  return "255, 255, 255"
+  const wdx = x - 0.5
+  const wdy = y - 0.14
+  if (wdx * wdx + wdy * wdy < 0.0018) return "150, 215, 255" // cockpit window
+  if (y > 0.86) return "255, 176, 84"                        // engine base / nozzle glow
+  if (y > 0.58 && (x < 0.40 || x > 0.60)) return "214, 64, 64" // fin accent
+  return "255, 255, 255"                                     // hull
 }
 
 // ── Shape system ──────────────────────────────────────────────
@@ -117,26 +129,32 @@ function generateShapePoints(vertices, totalCount) {
   }))
 }
 
-const ROCKET_VERTICES = [
-  { x: 0.50, y: 0.02 }, // nose tip
-  { x: 0.58, y: 0.10 },
-  { x: 0.63, y: 0.22 },
-  { x: 0.64, y: 0.36 },
-  { x: 0.64, y: 0.58 },
-  { x: 0.86, y: 0.90 }, // right fin tip
-  { x: 0.86, y: 0.96 },
-  { x: 0.64, y: 0.80 },
-  { x: 0.58, y: 0.86 },
-  { x: 0.50, y: 0.90 }, // engine base center
-  { x: 0.42, y: 0.86 },
-  { x: 0.36, y: 0.80 },
-  { x: 0.14, y: 0.96 },
-  { x: 0.14, y: 0.90 }, // left fin tip
-  { x: 0.36, y: 0.58 },
-  { x: 0.36, y: 0.36 },
-  { x: 0.37, y: 0.22 },
-  { x: 0.42, y: 0.10 },
+// ── Rocket silhouette ────────────────────────────────────────
+// Defined as a right-side profile from nose tip to engine-base centerline,
+// then mirrored to build the full symmetric polygon. Easier to tune than
+// hand-listing all 18 points, and guarantees the two sides actually match.
+const ROCKET_RIGHT_PROFILE = [
+  { x: 0.500, y: 0.030 }, // nose tip (centerline)
+  { x: 0.560, y: 0.080 }, // nose curve
+  { x: 0.595, y: 0.150 }, // nose shoulder
+  { x: 0.612, y: 0.230 }, // where nose meets body
+  { x: 0.612, y: 0.620 }, // body, straight down to fin root
+  { x: 0.800, y: 0.800 }, // fin outer tip, swept back
+  { x: 0.780, y: 0.900 }, // fin bottom outer corner
+  { x: 0.612, y: 0.840 }, // fin trailing edge, back to body
+  { x: 0.580, y: 0.900 }, // taper into engine shoulder
+  { x: 0.500, y: 0.925 }, // engine base (centerline)
 ]
+
+function mirrorRocketVertices(rightProfile) {
+  const mirroredLeft = rightProfile
+    .slice(1, -1)          // drop the two centerline points to avoid duplicates
+    .reverse()
+    .map(p => ({ x: 1 - p.x, y: p.y }))
+  return [...rightProfile, ...mirroredLeft]
+}
+
+const ROCKET_VERTICES = mirrorRocketVertices(ROCKET_RIGHT_PROFILE)
 
 const SHAPES = {
   rocket: generateShapePoints(ROCKET_VERTICES, SHAPE_POINT_COUNT),
@@ -240,9 +258,13 @@ export default function ParticleField() {
 
     let exhaustParticles = []
     const EXHAUST_SPAWN_RATE = 50
-    const EXHAUST_LIFE = 10
+    const EXHAUST_LIFE = 32
     const EXHAUST_SPEED = 10
     const EXHAUST_SPREAD = 25
+    const EXHAUST_COOL_POINT = 0.45 // fraction of life where flame starts turning to smoke
+
+    let ignitionSmoke = []
+    let ignitionTriggered = false
 
     let explosionParticles = []
     let launchCompleteAtY = null
@@ -318,6 +340,20 @@ export default function ParticleField() {
       const explosionActive =
         launchCompleteAtY !== null && (scrollY - launchCompleteAtY) < explosionRange
 
+      // Reset the one-shot ignition burst once the rocket has fully
+      // reassembled at the pad (scrolled back above liftoff range).
+      if (launchProgress <= 0) {
+        ignitionTriggered = false
+      }
+
+      // Camera rumble: sharp right at ignition, tapering off as the
+      // rocket clears the pad and settles into a smooth ascent.
+      const shakeMag = (isShapeMode && launchProgress > 0 && launchProgress < 1)
+        ? CAMERA_SHAKE_MAX * Math.max(0.22, 1 - launchProgress * 1.6)
+        : 0
+      const shakeX = shakeMag ? (Math.random() - 0.5) * 2 * shakeMag : 0
+      const shakeY = shakeMag ? (Math.random() - 0.5) * 2 * shakeMag * CAMERA_SHAKE_VERTICAL_FACTOR : 0
+
       if (rect) {
         let boxLeft, boxWidth, boxTop, boxHeight
 
@@ -358,9 +394,14 @@ export default function ParticleField() {
       smoothedVisibility =
         smoothedVisibility * VISIBILITY_DECAY + rawVisibility * (1 - VISIBILITY_DECAY)
 
+      // Background is painted at true (unshaken) coordinates so the
+      // rumble never reveals gaps at the canvas edges.
       ctx.clearRect(0, 0, W, H)
       ctx.fillStyle = '#02030a'
       ctx.fillRect(0, 0, W, H)
+
+      ctx.save()
+      ctx.translate(shakeX, shakeY)
 
       particles.forEach((p, i) => {
         const pulse = 0.45 + Math.sin(frame * p.drift * 40 + p.phase) * 0.18
@@ -448,11 +489,32 @@ export default function ParticleField() {
         const engineX = smoothedBandLeft + 0.50 * smoothedBandWidth
         const engineY = smoothedRectTop + 0.90 * smoothedRectHeight - launchProgress * LAUNCH_RISE
 
+        // One-shot ignition puff, fired the instant liftoff starts.
+        if (!ignitionTriggered) {
+          ignitionTriggered = true
+          for (let i = 0; i < IGNITION_SMOKE_COUNT; i++) {
+            const angle = Math.random() * Math.PI * 2
+            const speed = 0.4 + Math.random() * 1.6
+            ignitionSmoke.push({
+              x: engineX + (Math.random() - 0.5) * 50,
+              y: engineY + (Math.random() - 0.5) * 10,
+              vx: Math.cos(angle) * speed,
+              vy: -Math.abs(Math.sin(angle)) * speed * 0.4 - 0.15,
+              life: IGNITION_SMOKE_LIFE,
+              maxLife: IGNITION_SMOKE_LIFE,
+              size: 9 + Math.random() * 16,
+            })
+          }
+        }
+
+        // Plume widens the higher (further into liftoff) the rocket gets.
+        const dynamicSpread = EXHAUST_SPREAD * (1 + launchProgress * 1.4)
+
         for (let s = 0; s < EXHAUST_SPAWN_RATE; s++) {
           exhaustParticles.push({
             x: engineX + (Math.random() - 0.5) * 14,
             y: engineY,
-            vx: (Math.random() - 0.5) * EXHAUST_SPREAD,
+            vx: (Math.random() - 0.5) * dynamicSpread,
             vy: EXHAUST_SPEED + Math.random() * EXHAUST_SPEED,
             life: EXHAUST_LIFE,
             maxLife: EXHAUST_LIFE,
@@ -460,15 +522,51 @@ export default function ParticleField() {
         }
       }
 
+      // Ignition smoke — soft, slow-drifting gray puffs from the launch pad.
+      ignitionSmoke = ignitionSmoke.filter(sp => {
+        sp.x += sp.vx
+        sp.y += sp.vy
+        sp.vy *= 0.985
+        sp.vx *= 0.985
+        sp.life--
+        if (sp.life <= 0) return false
+        const t = sp.life / sp.maxLife
+        ctx.beginPath()
+        ctx.arc(sp.x, sp.y, sp.size * (1.6 - t * 0.6), 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(200, 200, 205, ${t * 0.35})`
+        ctx.fill()
+        return true
+      })
+
+      // Exhaust flame — white-hot core cooling through orange into smoke.
       exhaustParticles = exhaustParticles.filter(ep => {
         ep.x += ep.vx
         ep.y += ep.vy
         ep.life--
         if (ep.life <= 0) return false
         const t = ep.life / ep.maxLife
+
+        let r, g, b, a
+        if (t > 1 - EXHAUST_COOL_POINT) {
+          // fresh: white-hot core fading to bright orange
+          const localT = (t - (1 - EXHAUST_COOL_POINT)) / EXHAUST_COOL_POINT
+          r = 255
+          g = Math.round(140 + localT * 115)
+          b = Math.round(40 + localT * 180)
+          a = 0.9
+        } else {
+          // aging: orange flame cooling into gray smoke
+          const localT = t / (1 - EXHAUST_COOL_POINT)
+          r = Math.round(255 * localT + 100 * (1 - localT))
+          g = Math.round(150 * localT + 100 * (1 - localT))
+          b = Math.round(50 * localT + 105 * (1 - localT))
+          a = 0.15 + localT * 0.55
+        }
+
+        const radius = PARTICLE_SIZE * (0.6 + (1 - t) * 1.6)
         ctx.beginPath()
-        ctx.arc(ep.x, ep.y, PARTICLE_SIZE * (0.6 + t * 0.8), 0, Math.PI * 2)
-        ctx.fillStyle = 'rgb(255, 165, 0)'
+        ctx.arc(ep.x, ep.y, radius, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
         ctx.fill()
         return true
       })
@@ -502,6 +600,8 @@ export default function ParticleField() {
         ctx.fill()
         return true
       })
+
+      ctx.restore()
 
       rafId = requestAnimationFrame(draw)
     }

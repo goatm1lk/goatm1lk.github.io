@@ -1,103 +1,79 @@
-'use client'
+// // components/Planet.js
+// 'use client'
 
-import { useEffect, useState } from 'react'
-import styles from './Planet.module.css'
+// import { useEffect, useRef } from 'react'
+// import styles from './Planet.module.css'
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value))
-}
+// const START_OFFSET_VW = 60     // planet starts this far right of center
+// const END_OFFSET_VW = -60      // ends this far left of center
+// const SCROLL_LERP = 0.08       // smoothing — matches FOCUS_LERP feel in ParticleField
+// const FADE_IN_RANGE = 0.15     // fraction of progress spent fading in
+// const FADE_OUT_RANGE = 0.15    // fraction of progress spent fading out
 
-export default function Planet({
-  size, top, left, right,
-  color, glow, ringColor,
-  parallaxSpeed = 0.15,
-  delay = 0,
-  appearStart = 0.4, // fraction of total page scroll (0-1) where it starts fading in
-  appearEnd = 0.6,   // fraction of total page scroll (0-1) where it starts fading out
-  fadeMargin = 0.08, // how much scroll range the fade in/out takes, before/after the window
-}) {
-  const [offset, setOffset] = useState(0)
-  const [opacity, setOpacity] = useState(0)
+// function clamp(v, min, max) {
+//   return Math.min(max, Math.max(min, v))
+// }
 
-  useEffect(() => {
-    let pageHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
+// let sections = Array.from(document.querySelectorAll('[data-particle-focus]'))
+// let targetSelector = document.querySelector('[data-particle-focus="left"]')
+// export default function Planet() {
 
-    const recalcPageHeight = () => {
-      pageHeight = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1)
-    }
-    window.addEventListener('resize', recalcPageHeight)
+//   console.log('Planet component rendering')
+//   const planetRef = useRef(null)
 
-    const onScroll = () => {
-      const scrollY = window.scrollY
-      setOffset(scrollY * parallaxSpeed)
+//   useEffect(() => {
+//     console.log('1. effect ran')
+//     const el = planetRef.current
+//     console.log('2. el is', el)
+//     if (!el) return
 
-      const progress = clamp(scrollY / pageHeight, 0, 1)
+//     let rafId
+//     let targetSection = document.querySelector(targetSelector)
+//     let smoothedProgress = 0
 
-      const fadeInStart = appearStart - fadeMargin
-      const fadeOutEnd = appearEnd + fadeMargin
+//     const resize = () => {
+//       targetSection = document.querySelector(targetSelector)
+//     }
+//     window.addEventListener('resize', resize)
 
-      let nextOpacity = 0
-      if (progress < fadeInStart || progress > fadeOutEnd) {
-        nextOpacity = 0
-      } else if (progress < appearStart) {
-        // Fading in
-        nextOpacity = (progress - fadeInStart) / (appearStart - fadeInStart)
-      } else if (progress <= appearEnd) {
-        // Fully visible
-        nextOpacity = 1
-      } else {
-        // Fading out
-        nextOpacity = 1 - (progress - appearEnd) / (fadeOutEnd - appearEnd)
-      }
+//     const tick = () => {
+//       if (targetSection) {
+//         const rect = targetSection.getBoundingClientRect()
+//         const vh = window.innerHeight
+//         const total = rect.height + vh
+//         const traveled = vh - rect.top
+//         const rawProgress = clamp(traveled / total, 0, 1)
+//         smoothedProgress += (rawProgress - smoothedProgress) * SCROLL_LERP
 
-      setOpacity(clamp(nextOpacity, 0, 1))
-    }
+//         console.log({ rectTop: rect.top, rawProgress, smoothedProgress }) // TEMP
+//       }
+//       const x = START_OFFSET_VW + (END_OFFSET_VW - START_OFFSET_VW) * smoothedProgress
 
-    onScroll() // set initial state on mount, in case page loads mid-scroll
-    window.addEventListener('scroll', onScroll, { passive: true })
+//       let opacity = 1
+//       if (smoothedProgress < FADE_IN_RANGE) {
+//         opacity = smoothedProgress / FADE_IN_RANGE
+//       } else if (smoothedProgress > 1 - FADE_OUT_RANGE) {
+//         opacity = (1 - smoothedProgress) / FADE_OUT_RANGE
+//       }
+//       opacity = clamp(opacity, 0, 1)
 
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', recalcPageHeight)
-    }
-  }, [parallaxSpeed, appearStart, appearEnd, fadeMargin])
+//       el.style.transform = `translate3d(${x}vw, 0, 0)`
+//       el.style.opacity = opacity
 
-  return (
-    <div
-      className={styles.planetWrapper}
-      style={{
-        width: size,
-        height: size,
-        top,
-        left,
-        right,
-        transform: `translateY(${offset}px)`,
-        opacity,
-        transition: 'opacity 0.3s ease-out',
-        pointerEvents: opacity < 0.05 ? 'none' : 'auto',
-      }}
-    >
-      <div
-        className={styles.planet}
-        style={{
-          background: color,
-          boxShadow: `0 0 40px 12px ${glow}, inset -18px -14px 35px rgba(0,0,0,0.55)`,
-          animationDelay: `${delay}s`,
-        }}
-      >
-        {ringColor && (
-          <div
-            className={styles.ring}
-            style={{
-              borderColor: ringColor,
-              width: size * 2.2,
-              left: -size * 0.6,
-              top: size * 0.38,
-            }}
-          />
-        )}
-        <div className={styles.shine} />
-      </div>
-    </div>
-  )
-}
+//       rafId = requestAnimationFrame(tick)
+//     }
+
+//     tick()
+
+//     return () => {
+//       cancelAnimationFrame(rafId)
+//       window.removeEventListener('resize', resize)
+//     }
+//   }, [targetSelector])
+
+//   return (
+//     <div className={styles.wrapper} aria-hidden="true">
+//       <div ref={planetRef} className={styles.planet} />
+//     </div>
+//   )
+// }

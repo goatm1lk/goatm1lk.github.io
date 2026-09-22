@@ -1,40 +1,28 @@
-.planetWrapper {
+/* components/Planet.module.css */
+.wrapper {
   position: fixed;
-  z-index: 1;
-}
-
-.planet {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  animation: float 10s ease-in-out infinite;
-  will-change: transform;
-}
-
-.shine {
-  position: absolute;
-  width: 35%;
-  height: 30%;
-  top: 14%;
-  left: 18%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 80%);
-  filter: blur(4px);
-}
-
-.ring {
-  position: absolute;
-  height: 18px;
-  border: 2px solid;
-  border-radius: 50%;
-  opacity: 0.55;
-  transform: rotateX(72deg);
+  inset: 0;
+  z-index: 20;           /* see z-index note below */
+  overflow: hidden;
   pointer-events: none;
 }
 
-@keyframes float {
-  0%   { transform: translateY(0px); }
-  50%  { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
+.planet {
+  position: absolute;
+  top: 18vh;
+  left: 50%;
+  width: 320px;
+  height: 320px;
+  margin-left: -160px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(210, 225, 255, 0.9) 0%,
+    rgba(140, 170, 230, 0.55) 40%,
+    rgba(80, 100, 170, 0.25) 70%,
+    rgba(80, 100, 170, 0) 100%
+  );
+  filter: blur(6px);
+  opacity: 1;
+  will-change: transform, opacity;
 }
